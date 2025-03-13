@@ -1,4 +1,5 @@
 import os
+import subprocess
 from dotenv import load_dotenv
 
 from flask import Flask, render_template, request, flash, redirect, session, g
@@ -437,9 +438,9 @@ def get_and_display_user_likes(user_id):
     return render_template('users/show_likes.html', user=user)
 
 
-##############################################################################
-# Homepage and error pages
-
+############################
+# Homepage and error pages #
+############################
 
 @app.get('/')
 def homepage():
@@ -489,3 +490,22 @@ def add_header(response):
     # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
     response.cache_control.no_store = True
     return response
+
+
+#################
+# Database init #
+#################
+
+
+# Ideally we would do this in the render shell, but that isn't accessible in
+# free tier
+# Initialize DB Route (Creates tables & seeds database)
+@app.route("/init-db")
+def init_db():
+    try:
+        # Run the seed script
+        subprocess.run(["python", "seed.py"], check=True)
+
+        return "Database initialized and seeded successfully!"
+    except Exception as e:
+        return f"Error initializing DB: {str(e)}"
